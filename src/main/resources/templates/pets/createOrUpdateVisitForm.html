@@ -34,12 +34,23 @@
         th:replace="~{fragments/inputField :: input ('Date', 'date', 'date')}"  />
       <input
         th:replace="~{fragments/inputField :: input ('Description', 'description', 'text')}" />
-    </div>
 
+      <select name="vetId" >
+        <span th:each="vet : ${vets}" th:object="${vet}">
+            <option th:value="*{id}" th:text="*{'Dr.' + lastName + ' ' + firstName + ' '+ specialties}"></option>
+        </span>
+      </select>
+
+
+
+    </div>
     <div class="form-group">
       <div class="col-sm-offset-2 col-sm-10">
         <input type="hidden" name="petId" th:value="${pet.id}" />
-        <button class="btn btn-default" type="submit">Add Visit</button>
+        <button
+          th:with="text=${visit['new']} ? 'Add Visit' : 'Update Visit'"
+
+          class="btn btn-default" type="submit" th:text="${text}">Add Visit</button>
       </div>
     </div>
   </form>

@@ -135,7 +135,7 @@ class ClinicServiceTests {
 
 	@Test
 	void shouldFindPetWithCorrectId() {
-		Pet pet7 = this.pets.findById(7);
+		Pet pet7 = this.pets.findById(7).get();
 		assertThat(pet7.getName()).startsWith("Samantha");
 		assertThat(pet7.getOwner().getFirstName()).isEqualTo("Jean");
 
@@ -177,14 +177,14 @@ class ClinicServiceTests {
 	@Test
 	@Transactional
 	void shouldUpdatePetName() throws Exception {
-		Pet pet7 = this.pets.findById(7);
+		Pet pet7 = this.pets.findById(7).get();
 		String oldName = pet7.getName();
 
 		String newName = oldName + "X";
 		pet7.setName(newName);
 		this.pets.save(pet7);
 
-		pet7 = this.pets.findById(7);
+		pet7 = this.pets.findById(7).get();
 		assertThat(pet7.getName()).isEqualTo(newName);
 	}
 
@@ -202,7 +202,7 @@ class ClinicServiceTests {
 	@Test
 	@Transactional
 	void shouldAddNewVisitForPet() {
-		Pet pet7 = this.pets.findById(7);
+		Pet pet7 = this.pets.findById(7).get();
 		int found = pet7.getVisits().size();
 		Visit visit = new Visit();
 		pet7.addVisit(visit);
@@ -210,7 +210,7 @@ class ClinicServiceTests {
 		this.visits.save(visit);
 		this.pets.save(pet7);
 
-		pet7 = this.pets.findById(7);
+		pet7 = this.pets.findById(7).get();
 		assertThat(pet7.getVisits().size()).isEqualTo(found + 1);
 		assertThat(visit.getId()).isNotNull();
 	}

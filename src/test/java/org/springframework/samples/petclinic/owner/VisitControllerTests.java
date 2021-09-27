@@ -52,7 +52,7 @@ class VisitControllerTests {
 
 	@BeforeEach
 	void init() {
-		given(this.pets.findById(TEST_PET_ID)).willReturn(new Pet());
+		given(this.pets.findById(TEST_PET_ID)).willReturn(java.util.Optional.of(new Pet()));
 	}
 
 	@Test

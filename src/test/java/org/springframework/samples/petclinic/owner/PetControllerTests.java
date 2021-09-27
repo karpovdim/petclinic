@@ -62,7 +62,7 @@ class PetControllerTests {
 		cat.setName("hamster");
 		given(this.pets.findPetTypes()).willReturn(Lists.newArrayList(cat));
 		given(this.owners.findById(TEST_OWNER_ID)).willReturn(new Owner());
-		given(this.pets.findById(TEST_PET_ID)).willReturn(new Pet());
+		given(this.pets.findById(TEST_PET_ID)).willReturn(java.util.Optional.of(new Pet()));
 
 	}
 
