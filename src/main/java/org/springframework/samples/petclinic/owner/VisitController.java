@@ -15,12 +15,6 @@
  */
 package org.springframework.samples.petclinic.owner;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.samples.petclinic.vet.VetRepository;
@@ -31,6 +25,11 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Juergen Hoeller
@@ -66,7 +65,7 @@ class VisitController {
 	 */
 	@ModelAttribute("visit")
 	public Visit loadPetWithVisit(@PathVariable("petId") int petId, Map<String, Object> model) {
-		Pet pet = this.petRepository.findById(petId).get();
+		Pet pet = this.petRepository.findById(petId).orElseThrow();;
 		pet.setVisitsInternal(this.visitRepository.findByPetId(petId));
 		model.put("pet", pet);
 		Visit visit = new Visit();
@@ -91,8 +90,8 @@ class VisitController {
 		if (result.hasErrors()) {
 			return PETS_CREATE_OR_UPDATE_VISIT_FORM;
 		} else {
-			Pet pet = petRepository.findById(visit.getPetId()).get();
-			visit.setVet(vetRepository.findById(vetId).get());
+			Pet pet = petRepository.findById(visit.getPetId()).orElseThrow();
+			visit.setVet(vetRepository.findById(vetId).orElseThrow());
 			pet.getVisitsInternal().add(visit);
 			this.visitRepository.save(visit);
 			return REDIRECT + OWNERS_OWNER_ID;
@@ -102,20 +101,22 @@ class VisitController {
 	@GetMapping("/owners/{ownerId}/pets/{petId}/visits/{visitId}/edit")
 	public String initUpdateForm(@PathVariable("visitId") int visitId, ModelMap model, @PathVariable int ownerId) {
 		Set<Pet> pets = petRepository.findAllByOwnerId(ownerId);
-		Visit visit = this.visitRepository.findById(visitId).get();
+		Visit visit = this.visitRepository.findById(visitId).orElseThrow();
 		model.put("visit", visit);
 		model.put("pets", pets);
 		return PETS_CREATE_OR_UPDATE_VISIT_FORM;
 	}
 
 	@PostMapping("/owners/{ownerId}/pets/{petId}/visits/{visitId}/edit")
-	public String processUpdateForm(@Valid Visit visit, BindingResult result, @RequestParam int vetId, ModelMap model, @PathVariable int visitId, @RequestParam int petId) {
+	public String processUpdateForm(@Valid Visit visit, BindingResult result,
+									@RequestParam int vetId, ModelMap model,
+									@PathVariable int visitId, @RequestParam int petId) {
 		if (result.hasErrors()) {
 			model.put("visit", visit);
 			return PETS_CREATE_OR_UPDATE_VISIT_FORM;
 		} else {
 			visitRepository.deleteById(visitId);
-			visit.setVet(vetRepository.findById(vetId).get());
+			visit.setVet(vetRepository.findById(vetId).orElseThrow());
 			visit.setPetId(petId);
 			this.visitRepository.save(visit);
 			return REDIRECT + OWNERS_OWNER_ID;
@@ -123,12 +124,12 @@ class VisitController {
 	}
 
 	@PostMapping("/owners/{ownerId}/pets/{petId}/visits/{visitId}/canceled")
-	public String processCanceledVisit(Visit visit, ModelMap model, @PathVariable int visitId, @PathVariable int ownerId, BindingResult result) {
+	public String processCanceledVisit(Visit visit, ModelMap model, @PathVariable int visitId, BindingResult result) {
 		if (result.hasErrors()) {
 			model.put("visit", visit);
 			return PETS_CREATE_OR_UPDATE_VISIT_FORM;
 		} else {
-			Visit visitCanceled = visitRepository.findById(visitId).get();
+			Visit visitCanceled = visitRepository.findById(visitId).orElseThrow();
 			visitCanceled.setCanceled(!visitCanceled.getCanceled());
 			visitRepository.save(visitCanceled);
 			return REDIRECT + OWNERS_OWNER_ID;

@@ -40,6 +40,11 @@ import java.util.Map;
 class OwnerController {
 
 	private static final String VIEWS_OWNER_CREATE_OR_UPDATE_FORM = "owners/createOrUpdateOwnerForm";
+	public static final String OWNERS_FIND_OWNERS = "owners/findOwners";
+	public static final String OWNERS_OWNER_DETAILS = "owners/ownerDetails";
+	public static final String REDIRECT = "redirect:";
+	public static final String OWNERS_OWNER_ID = "/owners/{ownerId}";
+	public static final String OWNERS_OWNERS_LIST = "owners/ownersList";
 
 	private final OwnerRepository owners;
 
@@ -66,17 +71,16 @@ class OwnerController {
 	public String processCreationForm(@Valid Owner owner, BindingResult result) {
 		if (result.hasErrors()) {
 			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
-		}
-		else {
+		} else {
 			this.owners.save(owner);
-			return "redirect:/owners/" + owner.getId();
+			return REDIRECT + OWNERS_OWNER_ID;
 		}
 	}
 
 	@GetMapping("/owners/find")
 	public String initFindForm(Map<String, Object> model) {
 		model.put("owner", new Owner());
-		return "owners/findOwners";
+		return OWNERS_FIND_OWNERS;
 	}
 
 	@GetMapping("/owners")
@@ -92,17 +96,15 @@ class OwnerController {
 		if (results.isEmpty()) {
 			// no owners found
 			result.rejectValue("lastName", "notFound", "not found");
-			return "owners/findOwners";
-		}
-		else if (results.size() == 1) {
+			return OWNERS_FIND_OWNERS;
+		} else if (results.size() == 1) {
 			// 1 owner found
 			owner = results.iterator().next();
-			return "redirect:/owners/" + owner.getId();
-		}
-		else {
+			return REDIRECT + "/owners/" + owner.getId();
+		} else {
 			// multiple owners found
 			model.put("selections", results);
-			return "owners/ownersList";
+			return OWNERS_OWNERS_LIST;
 		}
 	}
 
@@ -115,25 +117,25 @@ class OwnerController {
 
 	@PostMapping("/owners/{ownerId}/edit")
 	public String processUpdateOwnerForm(@Valid Owner owner, BindingResult result,
-			@PathVariable("ownerId") int ownerId) {
+										 @PathVariable("ownerId") int ownerId) {
 		if (result.hasErrors()) {
 			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
-		}
-		else {
+		} else {
 			owner.setId(ownerId);
 			this.owners.save(owner);
-			return "redirect:/owners/{ownerId}";
+			return REDIRECT + OWNERS_OWNER_ID;
 		}
 	}
 
 	/**
 	 * Custom handler for displaying an owner.
+	 *
 	 * @param ownerId the ID of the owner to display
 	 * @return a ModelMap with the model attributes for the view
 	 */
-	@GetMapping("/owners/{ownerId}")
+	@GetMapping(OWNERS_OWNER_ID)
 	public ModelAndView showOwner(@PathVariable("ownerId") int ownerId) {
-		ModelAndView mav = new ModelAndView("owners/ownerDetails");
+		ModelAndView mav = new ModelAndView(OWNERS_OWNER_DETAILS);
 		Owner owner = this.owners.findById(ownerId);
 		for (Pet pet : owner.getPets()) {
 			pet.setVisitsInternal(visits.findByPetId(pet.getId()));
