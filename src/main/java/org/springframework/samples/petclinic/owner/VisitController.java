@@ -17,6 +17,7 @@ package org.springframework.samples.petclinic.owner;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.validation.Valid;
 
@@ -96,30 +97,31 @@ class VisitController {
 		}
 	}
 
-	@GetMapping("/owners/*/pets/{petId}/visits/{visitId}/edit")
-	public String initUpdateForm(@PathVariable("visitId") int visitId, ModelMap model, @PathVariable int petId) {
+	@GetMapping("/owners/{ownerId}/pets/{petId}/visits/{visitId}/edit")
+	public String initUpdateForm(@PathVariable("visitId") int visitId, ModelMap model, @PathVariable int ownerId) {
+		Set<Pet> pets = petRepository.findAllByOwnerId(ownerId);
 		Visit visit = this.visitRepository.findById(visitId).get();
 		model.put("visit", visit);
+		model.put("pets", pets);
 		return "/pets/createOrUpdateVisitForm";
 	}
 
 	@PostMapping("/owners/{ownerId}/pets/{petId}/visits/{visitId}/edit")
-	public String processUpdateForm(@Valid Visit visit, BindingResult result, @RequestParam int vetId, ModelMap model, @PathVariable int visitId, @PathVariable int ownerId) {
+	public String processUpdateForm(@Valid Visit visit, BindingResult result, @RequestParam int vetId, ModelMap model, @PathVariable int visitId, @RequestParam int petId) {
 		if (result.hasErrors()) {
 			model.put("visit", visit);
 			return "/pets/createOrUpdateVisitForm";
 		} else {
-			Pet pet = petRepository.findById(visit.getPetId()).get();
 			visitRepository.deleteById(visitId);
 			visit.setVet(vetRepository.findById(vetId).get());
+			visit.setPetId(petId);
 			this.visitRepository.save(visit);
 			return "redirect:/owners/{ownerId}";
 		}
 	}
 
-
 	@PostMapping("/owners/{ownerId}/pets/{petId}/visits/{visitId}/canceled")
-	public String processCanceledVisit(Visit visit, ModelMap model,@PathVariable int visitId, @PathVariable int ownerId, BindingResult result) {
+	public String processCanceledVisit(Visit visit, ModelMap model, @PathVariable int visitId, @PathVariable int ownerId, BindingResult result) {
 		if (result.hasErrors()) {
 			model.put("visit", visit);
 			return "/pets/createOrUpdateVisitForm";
@@ -127,7 +129,7 @@ class VisitController {
 			Visit visitCanceled = visitRepository.findById(visitId).get();
 			visitCanceled.setCanceled(!visitCanceled.getCanceled());
 			visitRepository.save(visitCanceled);
-			return "redirect:/owners/" + ownerId;
+			return "redirect:/owners/{ownerId}";
 		}
 	}
 }

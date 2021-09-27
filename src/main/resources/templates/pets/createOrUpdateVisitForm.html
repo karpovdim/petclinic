@@ -37,10 +37,16 @@
 
       <select name="vetId" >
         <span th:each="vet : ${vets}" th:object="${vet}">
-            <option th:value="*{id}" th:text="*{'Dr.' + lastName + ' ' + firstName + ' '+ specialties}"></option>
+            <option th:value="*{id}" th:text="*{'Dr.' + lastName + ' ' + firstName}"></option>
         </span>
       </select>
-
+<div th:if="${pets != null && !pets.isEmpty()}">
+      <select name="petId" >
+        <span th:each="pet : ${pets}" th:object="${pet}">
+            <option th:value="*{id}" th:text="*{name}"></option>
+        </span>
+      </select>
+</div>
 
 
     </div>
